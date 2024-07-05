@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import {
   Container,
   SignUpContainer,
@@ -21,36 +22,56 @@ function App() {
   const [signinIn, setSigninIn] = useState(true);
 
   // State for sign-in form
-  const [signInEmail, setSignInEmail] = useState("");
-  const [signInPassword, setSignInPassword] = useState("");
+  const [signInEmail, setSignInEmail] = useState('');
+  const [signInPassword, setSignInPassword] = useState('');
 
   // State for sign-up form
-  const [signUpName, setSignUpName] = useState("");
-  const [signUpEmail, setSignUpEmail] = useState("");
-  const [signUpPassword, setSignUpPassword] = useState("");
+  const [signUpName, setSignUpName] = useState('');
+  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpPassword, setSignUpPassword] = useState('');
+  const [signUpRole, setSignUpRole] = useState('user'); // Default role is 'user'
+
+  // State for errors
+  const [error, setError] = useState('');
 
   // Handle sign-in
-  const handleSignIn = (event) => {
+  const handleSignIn = async (event) => {
     event.preventDefault();
-    console.log("Sign In:", { email: signInEmail, password: signInPassword });
-    // Add your sign-in logic here
+    try {
+      const response = await axios.post('http://localhost:4000/api/auth/signin', {
+        email: signInEmail,
+        password: signInPassword
+      });
+      console.log('Sign In:', response.data);
+      // Add your logic for successful sign-in
+      alert("user logged in successfully")
+    } catch (err) {
+      setError(err.response.data.message);
+    }
   };
 
   // Handle sign-up
-  const handleSignUp = (event) => {
+  const handleSignUp = async (event) => {
     event.preventDefault();
-    console.log("Sign Up:", {
-      name: signUpName,
-      email: signUpEmail,
-      password: signUpPassword,
-    });
-    // Add your sign-up logic here
+    try {
+      const response = await axios.post('http://localhost:4000/api/auth/signup', {
+        name: signUpName,
+        email: signUpEmail,
+        password: signUpPassword,
+        role: signUpRole
+      });
+      console.log('Sign Up:', response.data);
+      alert("user registred successfully")
+    } catch (err) {
+      setError(err.response.data.message);
+    }
   };
 
   return (
     <>
       <GlobalStyle />
       <div>
+        {error && <div style={{ color: 'red' }}>{error}</div>}
         <Container>
           <SignUpContainer signinIn={signinIn}>
             <Form onSubmit={handleSignUp}>
@@ -73,6 +94,20 @@ function App() {
                 value={signUpPassword}
                 onChange={(e) => setSignUpPassword(e.target.value)}
               />
+              <select
+                value={signUpRole}
+                onChange={(e) => setSignUpRole(e.target.value)}
+                style={{
+                  padding: '12px 15px',
+                  margin: '8px 0',
+                  width: '100%',
+                  backgroundColor: '#eee',
+                  border: 'none'
+                }}
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
               <Button type="submit">Sign Up</Button>
             </Form>
           </SignUpContainer>
